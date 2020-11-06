@@ -21,7 +21,7 @@ cp /home/$SUDOUSER/.kube/config /root/.kube/config
 runuser -l $SUDOUSER -c "oc patch configs.imageregistry.operator.openshift.io/cluster --type merge -p '{\"spec\":{\"defaultRoute\":true, \"replicas\":$WORKERNODECOUNT}}'"
 runuser -l $SUDOUSER -c "sleep 10"
 runuser -l $SUDOUSER -c "oc project kube-system"
-registryRoute=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}' --config /home/$SUDOUSER/.kube/config)
+registryRoute=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}' --kubeconfig /home/$SUDOUSER/.kube/config)
 runuser -l $SUDOUSER -c "cat > $OCPTEMPLATES/registries.conf <<EOF
 unqualified-search-registries = ['registry.access.redhat.com', 'docker.io']
 [[registry]]
@@ -175,9 +175,9 @@ runuser -l $SUDOUSER -c "oc policy add-role-to-user admin system:serviceaccount:
 # Download repo.yaml and px-override
 runuser -l $SUDOUSER -c "wget $ARTIFACTSLOCATION/scripts/portworx-override.yaml$ARTIFACTSTOKEN -O $INSTALLERHOME/portworx-override.yaml"
 runuser -l $SUDOUSER -c "wget $ARTIFACTSLOCATION/scripts/repo.yaml$ARTIFACTSTOKEN -O $INSTALLERHOME/repo.yaml"
-#runuser -l $SUDOUSER -c "sed -i s/APIKEYUSERNAME/\"$APIKEYUSERNAME\"/g $INSTALLERHOME/repo.yaml"
+# runuser -l $SUDOUSER -c "sed -i s/APIKEYUSERNAME/\"$APIKEYUSERNAME\"/g $INSTALLERHOME/repo.yaml"
 runuser -l $SUDOUSER -c "sed -i s/APIKEYSECRET/\"$APIKEY\"/g $INSTALLERHOME/repo.yaml"
-FSGROUP=$(oc describe project $NAMESPACE  --config /home/$SUDOUSER/.kube/config | grep sa.scc.uid-range | cut -d= -f2 | cut -d/ -f1)
+FSGROUP=$(oc describe project $NAMESPACE  --kubeconfig /home/$SUDOUSER/.kube/config | grep sa.scc.uid-range | cut -d= -f2 | cut -d/ -f1)
 runuser -l $SUDOUSER -c "sed -i s/PROJECTUID/\"$FSGROUP\"/g $INSTALLERHOME/portworx-override.yaml"
 runuser -l $SUDOUSER -c "sed -i s/FIPS/\"$FIPSENABLED\"/g $INSTALLERHOME/portworx-override.yaml"
 
