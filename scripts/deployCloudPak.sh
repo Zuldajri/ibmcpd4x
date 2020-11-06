@@ -26,10 +26,18 @@ echo "exit code: $var"
 done
 
 oc project $NAMESPACE
-$INSTALLERHOME/cpd-linux adm -r $INSTALLERHOME/repo.yaml -a $ASSEMBLY -n $NAMESPACE --accept-all-licenses --apply
+$INSTALLERHOME/cpd-cli adm -r $INSTALLERHOME/repo.yaml -a $ASSEMBLY -n $NAMESPACE --accept-all-licenses --apply
 REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
 TOKEN=$(oc serviceaccounts get-token cpdtoken -n $NAMESPACE)
-$INSTALLERHOME/cpd-linux -c ${storageclass} -r $INSTALLERHOME/repo.yaml -a $ASSEMBLY -n $NAMESPACE  --transfer-image-to=$REGISTRY/$NAMESPACE --target-registry-username=$OPENSHIFTUSER --target-registry-password=$TOKEN --accept-all-licenses ${override} --insecure-skip-tls-verify
+$INSTALLERHOME/cpd-cli install -c ${storageclass} -r $INSTALLERHOME/repo.yaml -a $ASSEMBLY -n $NAMESPACE  --transfer-image-to=$REGISTRY/$NAMESPACE --target-registry-username=$OPENSHIFTUSER --target-registry-password=$TOKEN --accept-all-licenses ${override} --insecure-skip-tls-verify
+
+if [ $? -eq 0 ]
+then
+    echo $(date) " - ${ASSEMBLY} install successful"
+else
+    echo $(date) " - ${ASSEMBLY} install failed"
+	exit 20
+fi
 
 echo "Script Complete"
 #==============================================================
