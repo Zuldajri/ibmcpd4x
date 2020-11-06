@@ -163,8 +163,9 @@ runuser -l $SUDOUSER -c "echo 'Sleeping for 12mins while MCs apply and the clust
 runuser -l $SUDOUSER -c "sleep 12m"
 
 #CPD Config
-runuser -l $SUDOUSER -c "wget $ARTIFACTSLOCATION/scripts/cpd-linux$ARTIFACTSTOKEN -O $INSTALLERHOME/cpd-linux"
-runuser -l $SUDOUSER -c "chmod +x $INSTALLERHOME/cpd-linux"
+runuser -l $SUDOUSER -c "wget $ARTIFACTSLOCATION/scripts/cpd-artifacts.tgz$ARTIFACTSTOKEN -O $INSTALLERHOME/cpd-artifacts.tgz"
+runuser -l $SUDOUSER -c "(cd $INSTALLERHOME && tar -xf cpd-artifacts.tgz)"
+runuser -l $SUDOUSER -c "chmod +x $INSTALLERHOME/cpd-cli"
 
 # Service Account Token for COD installation
 runuser -l $SUDOUSER -c "oc new-project $NAMESPACE"
@@ -174,7 +175,7 @@ runuser -l $SUDOUSER -c "oc policy add-role-to-user admin system:serviceaccount:
 # Download repo.yaml and px-override
 runuser -l $SUDOUSER -c "wget $ARTIFACTSLOCATION/scripts/portworx-override.yaml$ARTIFACTSTOKEN -O $INSTALLERHOME/portworx-override.yaml"
 runuser -l $SUDOUSER -c "wget $ARTIFACTSLOCATION/scripts/repo.yaml$ARTIFACTSTOKEN -O $INSTALLERHOME/repo.yaml"
-runuser -l $SUDOUSER -c "sed -i s/APIKEYUSERNAME/\"$APIKEYUSERNAME\"/g $INSTALLERHOME/repo.yaml"
+#runuser -l $SUDOUSER -c "sed -i s/APIKEYUSERNAME/\"$APIKEYUSERNAME\"/g $INSTALLERHOME/repo.yaml"
 runuser -l $SUDOUSER -c "sed -i s/APIKEYSECRET/\"$APIKEY\"/g $INSTALLERHOME/repo.yaml"
 FSGROUP=$(oc describe project $NAMESPACE  --config /home/$SUDOUSER/.kube/config | grep sa.scc.uid-range | cut -d= -f2 | cut -d/ -f1)
 runuser -l $SUDOUSER -c "sed -i s/PROJECTUID/\"$FSGROUP\"/g $INSTALLERHOME/portworx-override.yaml"
