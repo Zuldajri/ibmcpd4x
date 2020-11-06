@@ -190,7 +190,7 @@ runuser -l $SUDOUSER -c "oc create -f $INSTALLERHOME/openshiftfourx/cluster-auto
 echo $(date) " - Cluster Autoscaler setup complete"
 
 echo $(date) " - Setting up Machine Autoscaler"
-clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --config /home/$SUDOUSER/.kube/config)
+clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$SUDOUSER/.kube/config)
 runuser -l $SUDOUSER -c "cat > $INSTALLERHOME/openshiftfourx/machine-autoscaler.yaml <<EOF
 ---
 kind: MachineAutoscaler
@@ -236,7 +236,7 @@ runuser -l $SUDOUSER -c "oc create -f $INSTALLERHOME/openshiftfourx/machine-auto
 echo $(date) " - Machine Autoscaler setup complete"
 
 echo $(date) " - Setting up Machine health checks"
-clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --config /home/$SUDOUSER/.kube/config)
+clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$SUDOUSER/.kube/config)
 runuser -l $SUDOUSER -c "cat > $INSTALLERHOME/openshiftfourx/machine-health-check.yaml <<EOF
 ---
 apiVersion: machine.openshift.io/v1beta1
