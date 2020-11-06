@@ -1,7 +1,8 @@
 registry:
-  - url: cp.icr.io/cp/cpd
-    username: cp
-    apikey: APIKEYSECRET
+  - url: us.icr.io/release3_5_0_rc2
+    username: iamapikey
+    apikey: CUm3t_l0QVso-LNbldl5uIVNzHBFuuVN-KQISpCkRyj0
+    namespace: ""
     name: base-registry
 fileservers:
-  - url: https://raw.github.com/IBM/cloud-pak/master/repo/cpd3
+  - url: https://ibm-open-platform.ibm.com/repos/beta/cpd/3.5.0
