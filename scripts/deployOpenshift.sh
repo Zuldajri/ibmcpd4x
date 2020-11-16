@@ -74,10 +74,10 @@ echo $(date) " - Install httpd-tools Complete"
 echo $(date) " - Download Binaries"
 runuser -l $SUDOUSER -c "mkdir -p /home/$SUDOUSER/.openshift"
 
-runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.14/openshift-install-linux-4.5.14.tar.gz"
-runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.14/openshift-client-linux-4.5.14.tar.gz"
-runuser -l $SUDOUSER -c "tar -xvf openshift-install-linux-4.5.14.tar.gz -C $INSTALLERHOME"
-runuser -l $SUDOUSER -c "sudo tar -xvf openshift-client-linux-4.5.14.tar.gz -C /usr/bin"
+runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.18/openshift-install-linux-4.5.18.tar.gz"
+runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.18/openshift-client-linux-4.5.18.tar.gz"
+runuser -l $SUDOUSER -c "tar -xvf openshift-install-linux-4.5.18.tar.gz -C $INSTALLERHOME"
+runuser -l $SUDOUSER -c "sudo tar -xvf openshift-client-linux-4.5.18.tar.gz -C /usr/bin"
 
 chmod +x /usr/bin/kubectl
 chmod +x /usr/bin/oc
