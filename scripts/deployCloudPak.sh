@@ -8,12 +8,15 @@ export DOMAINNAME=$7
 export OPENSHIFTUSER=$8
 export INSTALLERHOME=/home/$SUDOUSER/.ibm
 
+#Add timestamp to script init
+echo $(date) " - Attempting ${ASSEMBLY} install"
+
 # Set parameters
 storageclass="nfs"
 override=""
 if [[ $STORAGEOPTION == "portworx" ]]; then
-    storageclass="portworx-shared-gp"
-    override="--override $INSTALLERHOME/portworx-override.yaml"
+    storageclass="portworx-shared-gp3"
+    override="--override-config portworx"
 fi
 
 # Install
@@ -27,9 +30,8 @@ done
 
 oc project $NAMESPACE
 $INSTALLERHOME/cpd-cli adm -r $INSTALLERHOME/repo.yaml -a $ASSEMBLY -n $NAMESPACE --accept-all-licenses --apply
-REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
-TOKEN=$(oc serviceaccounts get-token cpdtoken -n $NAMESPACE)
-$INSTALLERHOME/cpd-cli install -c ${storageclass} -r $INSTALLERHOME/repo.yaml -a $ASSEMBLY -n $NAMESPACE  --transfer-image-to=$REGISTRY/$NAMESPACE --target-registry-username=$OPENSHIFTUSER --target-registry-password=$TOKEN --accept-all-licenses ${override} --insecure-skip-tls-verify
+REGISTRY=$(oc registry info --internal)
+$INSTALLERHOME/cpd-cli install -c ${storageclass} -r $INSTALLERHOME/repo.yaml -a $ASSEMBLY -n $NAMESPACE  --cluster-pull-prefix=$REGISTRY/$NAMESPACE --accept-all-licenses ${override} --insecure-skip-tls-verify
 
 if [ $? -eq 0 ]
 then
