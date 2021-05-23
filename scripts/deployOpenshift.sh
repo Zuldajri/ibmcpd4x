@@ -42,7 +42,7 @@ export OPENSHIFTUSER=${34}
 #Var
 export INSTALLERHOME=/home/$SUDOUSER/.openshift
 
-yum-config-manager --disable rhui-rhel-7-server-dotnet-rhui-debug-rpms
+sudo yum update -y --disablerepo='*' --enablerepo='*microsoft*'
 
 # Grow Root File System
 yum -y install cloud-utils-growpart.noarch
