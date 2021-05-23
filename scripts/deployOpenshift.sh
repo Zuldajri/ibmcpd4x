@@ -42,6 +42,8 @@ export OPENSHIFTUSER=${34}
 #Var
 export INSTALLERHOME=/home/$SUDOUSER/.openshift
 
+yum-config-manager --disable rhui-rhel-7-server-dotnet-rhui-debug-rpms
+
 # Grow Root File System
 yum -y install cloud-utils-growpart.noarch
 echo $(date) " - Grow Root FS"
