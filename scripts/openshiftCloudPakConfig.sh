@@ -161,11 +161,11 @@ runuser -l $SUDOUSER -c "oc create -f $OCPTEMPLATES/chrony-mc.yaml"
 
 runuser -l $SUDOUSER -c "echo 'Sleeping for 12mins while MCs apply and the cluster restarts' "
 runuser -l $SUDOUSER -c "sleep 12m"
-https://github.com/IBM/cpd-cli/releases/download/v3.5.4/cpd-cli-linux-EE-3.5.4.tgz
+
 #CPD Config
-runuser -l $SUDOUSER -c "wget https://github.com/IBM/cpd-cli/releases/download/v3.5.4/cpd-cli-linux-EE-3.5.4.tgz -O $INSTALLERHOME/cpd-cli-linux-EE-3.5.4.tgz"
-runuser -l $SUDOUSER -c "(cd $INSTALLERHOME && tar -xf cpd-cli-linux-EE-3.5.4.tgz)"
-runuser -l $SUDOUSER -c "(cd $INSTALLERHOME/cpd-cli-linux-EE-3.5.4* && mv * $INSTALLERHOME/)"
+runuser -l $SUDOUSER -c "wget https://github.com/IBM/cpd-cli/releases/download/v3.5.2/cpd-cli-linux-EE-3.5.2.tgz -O $INSTALLERHOME/cpd-cli-linux-EE-3.5.2.tgz"
+runuser -l $SUDOUSER -c "(cd $INSTALLERHOME && tar -xf cpd-cli-linux-EE-3.5.2.tgz)"
+runuser -l $SUDOUSER -c "(cd $INSTALLERHOME/cpd-cli-linux-EE-3.5.2* && mv * $INSTALLERHOME/)"
 runuser -l $SUDOUSER -c "chmod +x $INSTALLERHOME/cpd-cli"
 
 # Service Account Token for COD installation
