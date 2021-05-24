@@ -192,7 +192,7 @@ runuser -l $SUDOUSER -c "$INSTALLERHOME/cloudctl-linux-amd64 case launch        
     --args \"--entitledRegistry ${CPD_REGISTRY} --entitledUser ${CPD_REGISTRY_USER} --entitledPass ${CPD_REGISTRY_PASSWORD}\""
 
 runuser -l $SUDOUSER -c "echo 'Sleeping 7m for operator to install'"
-runuser -l $SUDOUSER -c "sleep 7m"
+runuser -l $SUDOUSER -c "sleep 10m"
 runuser -l $SUDOUSER -c "OP_STATUS=$(oc get pods -n $OPT_NAMESPACE -l name=ibm-cp-data-operator --no-headers --kubeconfig /home/$SUDOUSER/.kube/config | awk '{print $3}')"
 runuser -l $SUDOUSER -c "echo OP_STATUS is {$OP_STATUS}"
 runuser -l $SUDOUSER -c "if [ $OP_STATUS != 'Running' ]; then echo \"CPD Operator Installation Failed\" ; exit 1 ; fi"
