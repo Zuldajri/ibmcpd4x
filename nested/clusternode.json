@@ -31,7 +31,7 @@
 			}
 		},
 		"dataDiskSize": {
-			"type": "int",
+			"type": "string",
 			"metadata": {
 				"description": "Size of Data Disk"
 			}
