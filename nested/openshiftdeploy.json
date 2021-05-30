@@ -181,7 +181,7 @@
 			}
 		},
 		"enableFips": {
-			"type": "bool",
+			"type": "string",
             "metadata": {
                 "description": "Enable FIPS encryption"
             }
@@ -199,7 +199,7 @@
 			}
 		},
 		"enableAutoscaler": {
-			"type": "bool",
+			"type": "string",
 			"metadata": {
 				"description": "Enable or Disable Openshift Autoscaler"
 			}
