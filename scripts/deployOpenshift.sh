@@ -40,33 +40,35 @@ export PUBLISH=${33}
 export OPENSHIFTUSER=${34}
 export ENABLEAUTOSCALER=${35}
 export OUTBOUNDTYPE=${36}
+export EXISTING_RESOURCE_GROUP_NAME=${37}
 
 #Var
 export INSTALLERHOME=/home/$SUDOUSER/.openshift
 
-#SSL certificate issue fix: https://access.redhat.com/solutions/3167021
-yum update --disablerepo=* --enablerepo="*microsoft*"
+echo $(date) " - Disable and enable repo starting"
+sudo yum update -y --disablerepo=* --enablerepo="*microsoft*"
+echo $(date) " - Disable and enable repo completed"
 
 # Grow Root File System
-# yum -y install cloud-utils-growpart.noarch
-# echo $(date) " - Grow Root FS"
+yum -y install cloud-utils-growpart.noarch
+echo $(date) " - Grow Root FS"
 
-# rootdev=`findmnt --target / -o SOURCE -n`
-# rootdrivename=`lsblk -no pkname $rootdev`
-# rootdrive="/dev/"$rootdrivename
-# name=`lsblk  $rootdev -o NAME | tail -1`
-# part_number=${name#*${rootdrivename}}
+rootdev=`findmnt --target / -o SOURCE -n`
+rootdrivename=`lsblk -no pkname $rootdev`
+rootdrive="/dev/"$rootdrivename
+name=`lsblk  $rootdev -o NAME | tail -1`
+part_number=${name#*${rootdrivename}}
 
-# growpart $rootdrive $part_number -u on
-# xfs_growfs $rootdev
+growpart $rootdrive $part_number -u on
+xfs_growfs $rootdev
 
-# if [ $? -eq 0 ]
-# then
-#     echo $(date) " - Root File System successfully extended"
-# else
-#     echo $(date) " - Root File System failed to be grown"
-# 	exit 20
-# fi
+if [ $? -eq 0 ]
+then
+    echo $(date) " - Root File System successfully extended"
+else
+    echo $(date) " - Root File System failed to be grown"
+	exit 20
+fi
 
 echo $(date) " - Install Podman"
 yum install -y podman
@@ -79,10 +81,11 @@ echo $(date) " - Install httpd-tools Complete"
 echo $(date) " - Download Binaries"
 runuser -l $SUDOUSER -c "mkdir -p /home/$SUDOUSER/.openshift"
 
-runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.27/openshift-install-linux-4.6.27.tar.gz"
-runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.27/openshift-client-linux-4.6.27.tar.gz"
-runuser -l $SUDOUSER -c "tar -xvf openshift-install-linux-4.6.27.tar.gz -C $INSTALLERHOME"
-runuser -l $SUDOUSER -c "sudo tar -xvf openshift-client-linux-4.6.27.tar.gz -C /usr/bin"
+runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.31/openshift-install-linux-4.6.31.tar.gz"
+runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.31/openshift-client-linux-4.6.31.tar.gz"
+runuser -l $SUDOUSER -c "tar -xvf openshift-install-linux-4.6.31.tar.gz -C $INSTALLERHOME"
+runuser -l $SUDOUSER -c "sudo tar -xvf openshift-client-linux-4.6.31.tar.gz -C /usr/bin"
+
 
 chmod +x /usr/bin/kubectl
 chmod +x /usr/bin/oc
@@ -150,6 +153,7 @@ platform:
     controlPlaneSubnet: $MASTERSUBNETNAME
     computeSubnet: $WORKERSUBNETNAME
     outboundType: $OUTBOUNDTYPE
+    resourceGroupName: $EXISTING_RESOURCE_GROUP_NAME
 pullSecret: '$PULLSECRET'
 fips: $FIPS
 publish: $PUBLISH
@@ -158,7 +162,10 @@ sshKey: |
 EOF
 echo $(date) " - Setup Install config - Complete"
 
+runuser -l $SUDOUSER -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
+
 echo $(date) " - Install OCP"
+runuser -l $SUDOUSER -c "export ARM_SKIP_PROVIDER_REGISTRATION=true"
 runuser -l $SUDOUSER -c "$INSTALLERHOME/openshift-install create cluster --dir=$INSTALLERHOME/openshiftfourx --log-level=debug"
 runuser -l $SUDOUSER -c "sleep 120"
 echo $(date) " - OCP Install Complete"
