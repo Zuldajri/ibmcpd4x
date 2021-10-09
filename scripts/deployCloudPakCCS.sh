@@ -16,6 +16,7 @@ export INSTALLERHOME=/home/$SUDOUSER/.ibm
 export OCPTEMPLATES=/home/$SUDOUSER/.openshift/templates
 export CPDTEMPLATES=/home/$SUDOUSER/.cpd/templates
 
+echo "$(date) - Set parameters"
 # Set parameters
 if [[ $STORAGEOPTION == "portworx" ]]; then
     STORAGECLASS_VALUE="portworx-shared-gp3"
@@ -28,8 +29,8 @@ elif [[ $STORAGEOPTION == "nfs" ]]; then
     STORAGEVENDOR_VALUE=""
 fi
 
-echo $(date)
 
+echo "$(date) - Login"
 #Login
 var=1
 while [ $var -ne 0 ]; do
@@ -39,7 +40,7 @@ var=$?
 echo "exit code: $var"
 done
 
-echo $(date)
+echo "$(date) - CCS subscription and CR creation"
 
 # CCS subscription and CR creation 
 
@@ -75,7 +76,7 @@ spec:
   docker_registry_prefix: \"cp.icr.io/cp/cpd\"
 EOF"
 
-echo $(date)
+echo "$(date) - Creating Subscription"
 
 ## Creating Subscription 
 
@@ -83,7 +84,7 @@ runuser -l $SUDOUSER -c "oc create -f $CPDTEMPLATES/ibm-ccs-sub.yaml"
 runuser -l $SUDOUSER -c "echo 'Sleeping for 5m' "
 runuser -l $SUDOUSER -c "sleep 5m"
 
-echo $(date)
+echo "$(date) - Check ibm-cpd-ccs-operator pod status"
 
 # Check ibm-cpd-ccs-operator pod status
 
@@ -106,7 +107,7 @@ do
   echo "$pod_name is $status"
 done
 
-echo $(date)
+echo "$(date) - Creating ibm-ccs cr"
 
 ## Creating ibm-ccs cr
 if [[ $STORAGEOPTION == "nfs" ]];then 
@@ -120,7 +121,7 @@ fi
 
 runuser -l $SUDOUSER -c "oc project $CPDNAMESPACE; oc create -f $CPDTEMPLATES/ibm-ccs-cr.yaml"
 
-echo $(date)
+echo "$(date) - Check CR Status"
 
 # Check CR Status
 
