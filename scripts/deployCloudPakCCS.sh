@@ -28,6 +28,8 @@ elif [[ $STORAGEOPTION == "nfs" ]]; then
     STORAGEVENDOR_VALUE=""
 fi
 
+echo $(date)
+
 #Login
 var=1
 while [ $var -ne 0 ]; do
@@ -36,6 +38,8 @@ oc login "https://api.${CLUSTERNAME}.${DOMAINNAME}:6443" -u $OPENSHIFTUSER -p $O
 var=$?
 echo "exit code: $var"
 done
+
+echo $(date)
 
 # CCS subscription and CR creation 
 
@@ -71,12 +75,15 @@ spec:
   docker_registry_prefix: \"cp.icr.io/cp/cpd\"
 EOF"
 
+echo $(date)
 
 ## Creating Subscription 
 
 runuser -l $SUDOUSER -c "oc create -f $CPDTEMPLATES/ibm-ccs-sub.yaml"
 runuser -l $SUDOUSER -c "echo 'Sleeping for 5m' "
 runuser -l $SUDOUSER -c "sleep 5m"
+
+echo $(date)
 
 # Check ibm-cpd-ccs-operator pod status
 
@@ -99,6 +106,8 @@ do
   echo "$pod_name is $status"
 done
 
+echo $(date)
+
 ## Creating ibm-ccs cr
 if [[ $STORAGEOPTION == "nfs" ]];then 
 runuser -l $SUDOUSER -c "sed -i -e s#REPLACE_VENDOR_OR_CLASS#storageClass#g $CPDTEMPLATES/ibm-ccs-cr.yaml"
@@ -111,6 +120,8 @@ fi
 
 runuser -l $SUDOUSER -c "oc project $CPDNAMESPACE; oc create -f $CPDTEMPLATES/ibm-ccs-cr.yaml"
 
+echo $(date)
+
 # Check CR Status
 
 SERVICE="CCS"
@@ -120,7 +131,7 @@ SERVICE_STATUS="ccsStatus"
 STATUS=$(oc get $SERVICE $CRNAME -n $CPDNAMESPACE -o json | jq .status.$SERVICE_STATUS | xargs) 
 
 while  [[ ! $STATUS =~ ^(Completed|Complete)$ ]]; do
-    echo "$CRNAME is Installing!!!!"
+    echo "$(date) - $CRNAME is Installing!!!!"
     sleep 60 
     STATUS=$(oc get $SERVICE $CRNAME -n $CPDNAMESPACE -o json | jq .status.$SERVICE_STATUS | xargs) 
     if [ "$STATUS" == "Failed" ]
