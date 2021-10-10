@@ -89,7 +89,7 @@ kind: WS
 metadata:
   name: ws-cr
 spec:
-  version: \"4.0.0\"
+  version: \"4.0.2\"
   size: \"small\"
   storageClass: \"$STORAGECLASS_VALUE\"
   storageVendor: \"$STORAGEVENDOR_VALUE\"
@@ -105,7 +105,7 @@ kind: WS
 metadata:
   name: ws-cr
 spec:
-  version: \"4.0.0\"
+  version: \"4.0.2\"
   size: \"small\"
   storageClass: \"$STORAGECLASS_VALUE\"
   license:
