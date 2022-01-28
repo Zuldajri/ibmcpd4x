@@ -89,7 +89,13 @@
 				"storageAccountType": "[parameters('vmStorageType')]"
 			},
 			"createOption": "Empty"
-		}]
+		}],
+		"imageReference": {
+			"publisher": "RedHat",
+			"offer": "RHEL",
+			"sku": "7-RAW",
+			"version": "latest"
+		}
 	},
 	"resources": [
 		{
@@ -120,7 +126,7 @@
 					}
 				},
 				"storageProfile": {
-					"imageReference": "[parameters('imageReference')]",
+					"imageReference": "[variables('imageReference')]",
 					"osDisk": {
 						"name": "[concat(parameters('hostName'), '-osdisk')]",
 						"managedDisk": {
