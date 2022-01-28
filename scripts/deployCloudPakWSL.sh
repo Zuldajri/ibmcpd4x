@@ -9,14 +9,14 @@ export CLUSTERNAME=$6
 export DOMAINNAME=$7
 export OPENSHIFTUSER=$8
 export APIKEY=$9
+CHANNEL="v2.0"
+VERSION="4.0.2"
 
 export INSTALLERHOME=/home/$SUDOUSER/.ibm
 export OPERATORNAMESPACE=ibm-common-services
 export INSTALLERHOME=/home/$SUDOUSER/.ibm
 export OCPTEMPLATES=/home/$SUDOUSER/.openshift/templates
 export CPDTEMPLATES=/home/$SUDOUSER/.cpd/templates
-
-echo "$(date) - Set parameters"
 
 # Set parameters
 if [[ $STORAGEOPTION == "portworx" ]]; then
@@ -30,8 +30,6 @@ elif [[ $STORAGEOPTION == "nfs" ]]; then
     STORAGEVENDOR_VALUE=""
 fi
 
-echo "$(date) - Login"
-
 #Login
 var=1
 while [ $var -ne 0 ]; do
@@ -41,42 +39,17 @@ var=$?
 echo "exit code: $var"
 done
 
-echo "$(date) - Datarefinery Catalog source"
-# Datarefinery Catalog source 
-
-runuser -l $SUDOUSER -c "cat > $CPDTEMPLATES/ibm-dr-catalogsource.yaml <<EOF
-apiVersion: operators.coreos.com/v1alpha1
-kind: CatalogSource
-metadata:
-  name: ibm-cpd-datarefinery-operator-catalog
-  namespace: openshift-marketplace
-spec:
-  sourceType: grpc
-  image: icr.io/cpopen/ibm-cpd-datarefinery-operator-catalog@sha256:27c6b458244a7c8d12da72a18811d797a1bef19dadf84b38cedf6461fe53643a
-  imagePullPolicy: Always
-  displayName: Cloud Pak for Data IBM DataRefinery
-  publisher: IBM
-EOF"
-
-echo "$(date) - Create DR catalog source"
-# Create DR catalog source. 
-
-runuser -l $SUDOUSER -c "oc create -f $CPDTEMPLATES/ibm-dr-catalogsource.yaml"
-runuser -l $SUDOUSER -c "echo 'Sleeping for 1m' "
-runuser -l $SUDOUSER -c "sleep 1m"
-
-echo "$(date) - WOS subscription and CR creation"
-# WOS subscription and CR creation 
+# WSL subscription and CR creation 
 
 runuser -l $SUDOUSER -c "cat > $CPDTEMPLATES/ibm-wsl-sub.yaml <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   annotations: {}
-  name: ibm-cpd-ws-operator-catalog
+  name: ibm-cpd-ws-operator-catalog-subscription
   namespace: $OPERATORNAMESPACE
 spec:
-  channel: v2.0
+  channel: $CHANNEL
   installPlanApproval: Automatic
   name: ibm-cpd-wsl
   source: ibm-operator-catalog
@@ -88,15 +61,15 @@ apiVersion: ws.cpd.ibm.com/v1beta1
 kind: WS
 metadata:
   name: ws-cr
+  namespace: $CPDNAMESPACE
 spec:
-  version: \"4.0.2\"
+  version: \"$VERSION\"
   size: \"small\"
   storageClass: \"$STORAGECLASS_VALUE\"
   storageVendor: \"$STORAGEVENDOR_VALUE\"
   license:
     accept: true
     license: Enterprise
-  docker_registry_prefix: \"cp.icr.io/cp/cpd\"
 EOF"
 
 runuser -l $SUDOUSER -c "cat > $CPDTEMPLATES/ibm-wsl-nfs-cr.yaml <<EOF
@@ -104,24 +77,22 @@ apiVersion: ws.cpd.ibm.com/v1beta1
 kind: WS
 metadata:
   name: ws-cr
+  namespace: $CPDNAMESPACE
 spec:
-  version: \"4.0.2\"
+  version: \"$VERSION\"
   size: \"small\"
   storageClass: \"$STORAGECLASS_VALUE\"
   license:
     accept: true
     license: Enterprise
-  docker_registry_prefix: \"cp.icr.io/cp/cpd\"
 EOF"
 
-echo "$(date) - Creating Subscription"
 ## Creating Subscription 
 
 runuser -l $SUDOUSER -c "oc create -f $CPDTEMPLATES/ibm-wsl-sub.yaml"
 runuser -l $SUDOUSER -c "echo 'Sleeping for 5m' "
 runuser -l $SUDOUSER -c "sleep 5m"
 
-echo "$(date) - Check ibm-cpd-ws-operator pod status"
 # Check ibm-cpd-ws-operator pod status
 
 podname="ibm-cpd-ws-operator"
@@ -143,7 +114,6 @@ do
   echo "$pod_name is $status"
 done
 
-echo "$(date) - Creating ibm-wsl cr"
 ## Creating ibm-wsl cr
 
 if [[ $STORAGEOPTION == "nfs" ]];then 
@@ -155,7 +125,6 @@ elif [[ $STORAGEOPTION == "ocs" || $STORAGEOPTION == "portworx" ]];then
     runuser -l $SUDOUSER -c "oc project $CPDNAMESPACE; oc create -f $CPDTEMPLATES/ibm-wsl-ocs-pwx-cr.yaml"
 fi
 
-echo "$(date) - Check CR Status"
 # Check CR Status
 
 SERVICE="WS"
@@ -165,7 +134,7 @@ SERVICE_STATUS="wsStatus"
 STATUS=$(oc get $SERVICE $CRNAME -n $CPDNAMESPACE -o json | jq .status.$SERVICE_STATUS | xargs) 
 
 while  [[ ! $STATUS =~ ^(Completed|Complete)$ ]]; do
-    echo "$(date) - $CRNAME is Installing!!!!"
+    echo "$CRNAME is Installing!!!!"
     sleep 60 
     STATUS=$(oc get $SERVICE $CRNAME -n $CPDNAMESPACE -o json | jq .status.$SERVICE_STATUS | xargs) 
     if [ "$STATUS" == "Failed" ]
