@@ -9,6 +9,8 @@ export CLUSTERNAME=$6
 export DOMAINNAME=$7
 export OPENSHIFTUSER=$8
 export APIKEY=$9
+CHANNEL="v1.0"
+VERSION="4.0.2"
 
 export INSTALLERHOME=/home/$SUDOUSER/.ibm
 export OPERATORNAMESPACE=ibm-common-services
@@ -46,7 +48,7 @@ metadata:
   name: ug-cr
   namespace: $CPDNAMESPACE
 spec:
-  version: \"4.0.0\"
+  version: \"$VERSION\"
   size: \"small\"
   storageVendor: \"$STORAGEVENDOR_VALUE\"
   license:
@@ -62,7 +64,7 @@ metadata:
   name: ug-cr
   namespace: $CPDNAMESPACE
 spec:
-  version: \"4.0.0\"
+  version: \"$VERSION\"
   size: \"small\"
   storageClass: \"$STORAGECLASS_VALUE\"
   license:
