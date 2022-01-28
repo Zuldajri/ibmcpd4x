@@ -50,25 +50,25 @@ sudo yum update -y --disablerepo=* --enablerepo="*microsoft*"
 echo $(date) " - Disable and enable repo completed"
 
 # Grow Root File System
-#yum -y install cloud-utils-growpart.noarch
-#echo $(date) " - Grow Root FS"
+yum -y install cloud-utils-growpart.noarch
+echo $(date) " - Grow Root FS"
 
-#rootdev=`findmnt --target / -o SOURCE -n`
-#rootdrivename=`lsblk -no pkname $rootdev`
-#rootdrive="/dev/"$rootdrivename
-#name=`lsblk  $rootdev -o NAME | tail -1`
-#part_number=${name#*${rootdrivename}}
+rootdev=`findmnt --target / -o SOURCE -n`
+rootdrivename=`lsblk -no pkname $rootdev`
+rootdrive="/dev/"$rootdrivename
+name=`lsblk  $rootdev -o NAME | tail -1`
+part_number=${name#*${rootdrivename}}
 
-#growpart $rootdrive $part_number -u on
-#xfs_growfs $rootdev
+growpart $rootdrive $part_number -u on
+xfs_growfs $rootdev
 
-#if [ $? -eq 0 ]
-#then
-#    echo $(date) " - Root File System successfully extended"
-#else
-#    echo $(date) " - Root File System failed to be grown"
-#	exit 20
-#fi
+if [ $? -eq 0 ]
+then
+    echo $(date) " - Root File System successfully extended"
+else
+    echo $(date) " - Root File System failed to be grown"
+	exit 20
+fi
 
 echo $(date) " - Install Podman"
 yum install -y podman
@@ -81,11 +81,10 @@ echo $(date) " - Install httpd-tools Complete"
 echo $(date) " - Download Binaries"
 runuser -l $SUDOUSER -c "mkdir -p /home/$SUDOUSER/.openshift"
 
-runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.31/openshift-install-linux-4.6.31.tar.gz"
-runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.31/openshift-client-linux-4.6.31.tar.gz"
-runuser -l $SUDOUSER -c "tar -xvf openshift-install-linux-4.6.31.tar.gz -C $INSTALLERHOME"
-runuser -l $SUDOUSER -c "sudo tar -xvf openshift-client-linux-4.6.31.tar.gz -C /usr/bin"
-
+runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.8.11/openshift-install-linux-4.8.11.tar.gz"
+runuser -l $SUDOUSER -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.8.11/openshift-client-linux-4.8.11.tar.gz"
+runuser -l $SUDOUSER -c "tar -xvf openshift-install-linux-4.8.11.tar.gz -C $INSTALLERHOME"
+runuser -l $SUDOUSER -c "sudo tar -xvf openshift-client-linux-4.8.11.tar.gz -C /usr/bin"
 
 chmod +x /usr/bin/kubectl
 chmod +x /usr/bin/oc
@@ -329,8 +328,7 @@ if [[ $STORAGEOPTION == "portworx" ]]; then
   runuser -l $SUDOUSER -c "wget $ARTIFACTSLOCATION/scripts/px-install.yaml$ARTIFACTSTOKEN -O $INSTALLERHOME/openshiftfourx/px-install.yaml"
   runuser -l $SUDOUSER -c "wget $ARTIFACTSLOCATION/scripts/px-storageclasses.yaml$ARTIFACTSTOKEN -O $INSTALLERHOME/openshiftfourx/px-storageclasses.yaml"
   runuser -l $SUDOUSER -c "oc create -f $INSTALLERHOME/openshiftfourx/px-install.yaml"
-  runuser -l $SUDOUSER -c "echo 'sleep 3mins'"
-  runuser -l $SUDOUSER -c "sleep 180"
+  runuser -l $SUDOUSER -c "sleep 30"
   runuser -l $SUDOUSER -c "oc apply -f '$PXSPECURL'"
   runuser -l $SUDOUSER -c "oc create -f $INSTALLERHOME/openshiftfourx/px-storageclasses.yaml"
 fi
@@ -344,7 +342,7 @@ echo $(date) " - Setting up $STORAGEOPTION - Done"
 
 echo $(date) " - Creating $OPENSHIFTUSER user"
 runuser -l $SUDOUSER -c "htpasswd -c -B -b /tmp/.htpasswd '$OPENSHIFTUSER' '$OPENSHIFTPASSWORD'"
-runuser -l $SUDOUSER -c "sleep 5"
+runuser -l $SUDOUSER -c "sleep 3"
 runuser -l $SUDOUSER -c "oc create secret generic htpass-secret --from-file=htpasswd=/tmp/.htpasswd -n openshift-config"
 runuser -l $SUDOUSER -c "cat >  $INSTALLERHOME/openshiftfourx/auth.yaml <<EOF
 apiVersion: config.openshift.io/v1
