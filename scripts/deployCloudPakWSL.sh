@@ -10,7 +10,7 @@ export DOMAINNAME=$7
 export OPENSHIFTUSER=$8
 export APIKEY=$9
 CHANNEL="v2.0"
-VERSION="4.0.2"
+VERSION="4.0.9"
 
 export INSTALLERHOME=/home/$SUDOUSER/.ibm
 export OPERATORNAMESPACE=ibm-common-services
